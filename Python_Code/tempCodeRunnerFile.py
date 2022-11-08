@@ -1,1 +1,1 @@
-./input_data/test_data_HW3.toml
+./input_data/tic_tac_toe.toml
