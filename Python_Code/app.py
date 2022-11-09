@@ -1,27 +1,39 @@
 ''' This is the main file for our GHR-ing Machine! '''
 
 from pathlib import Path
+import os
 import tomllib
 import numpy as np
 import pandas as pd
 
-HOMEWORK_PREFIX = "_HW"
+DIRECTORY_PATH = r'./input_data/'
+HOMEWORK_SUFFIX = "_HW_"
 
 ''' Currently, this function will ask the user to enter a file name and will
     first check if the input is a valid path and also that it contains "_HW"
     since that is the constant above. If not found, it will call itself again
-    until a valid path is entered then will return the file_choice'''
+    until a valid path is entered then will return the full_input_fule'''
 
 
 def check_valid_file():
-    file_choice = input("Enter a file name:\n")
-    path = Path(file_choice)
-    if path.is_file() and HOMEWORK_PREFIX in file_choice:
-        print(f'The file {file_choice} exists!!')
-        return file_choice
+    # get input
+    current_dir = os.listdir(DIRECTORY_PATH)
+    input_file = input("Enter a file name: (EX: HW_3 , HW_5, ...)\n")
+
+    # look for a file with given suffix (forgive me string manipulation ancestors, for I am comitting sins)
+    full_input_file = (str([
+        path_string for path_string in current_dir if input_file in path_string])).replace('[\'', '').replace('\']', '')
+
+    # set path and see if it actually exists
+    path = Path(DIRECTORY_PATH + full_input_file)
+    if path.is_file() and HOMEWORK_SUFFIX in full_input_file:
+        # if the file exists, we can pass it back to be opened
+        print(f'The file {full_input_file} exists!!')
+        return full_input_file
     else:
+        # if the file does not exist, we will recall the function until valid input is given
         print(
-            f'The file "{file_choice}" either does not exist, or does not follow the naming convention :(\nPlease try again...\n')
+            'That file either does not exist, or does not follow the naming convention :(\nPlease try again...\n')
         check_valid_file()
 
 
@@ -64,8 +76,6 @@ def ask_for_edits(student_scores_df, original_data_list_df):
 
 
 def make_new_line(input_question_grade):
-    print(
-        f"the input_question grade is {input_question_grade} and is type {type(input_question_grade)}")
     new_score = input(
         f"What was the score for question {input_question_grade[0]}? (Max value = {input_question_grade[1]})\n")
     new_comment = input("Comments?\n")
@@ -91,27 +101,26 @@ def input_grades(input_data_list):
         student_scores_df = pd.concat(
             [student_scores_df, new_line_df], ignore_index=True, axis=0)
 
-    # ask the user if they need to make changes
-
+    # ask the user if they need to make changes, and
     # if the user wants to edit, it will also make all edits
     edited_student_scores_df = ask_for_edits(
         student_scores_df, input_data_list)
 
-    return edited_student_scores_df  # return the copy with edits
+    return edited_student_scores_df  # return the copy with all edits
 
 
 # MAIN ====================================================================================
 
 # preliminary
 print("\n\nThe GHR-ing Machine V0.1")
-print("(Input the data in a 'questions_HWx.toml' file, where x = the homework number)\n\n")
+print("(Input the data in a 'questions_HW_x.toml' file, where x = the homework number)\n\n")
 
 
 # ask for file name (runs validation before saving)
 final_file_choice = check_valid_file()
 
 # Handle homework file and extract a list of questions (toml -> dict -> list)
-with open("./input_data/test_data_HW3.toml", mode="rb") as fp:
+with open("./input_data/test_data_HW_3.toml", mode="rb") as fp:
     config = tomllib.load(fp)
 data_list = list(config['questions'].items())
 
@@ -134,6 +143,7 @@ print(final_grade_df)
 # export as toml or csv? (WITH STUDENT NAME ATTACHED)
 # validate student name
 # validate number is within range
+# config file (homework suffix, include first row, ...)
 
 # ------------------------------------------------------------------------------------------
 # test stuff
@@ -143,7 +153,7 @@ print(final_grade_df)
 
 # print(config["user"]["player_o"])
 
-# with open("./input_data/test_data_HW3.toml", mode="rb") as fp:
+# with open("./input_data/test_data_HW_3.toml", mode="rb") as fp:
 #     config1 = tomllib.load(fp)
 
 # print(config1["questions"]["2_1_1"])
