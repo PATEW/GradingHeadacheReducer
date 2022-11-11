@@ -6,8 +6,10 @@ import tomllib
 import numpy as np
 import pandas as pd
 
-DIRECTORY_PATH = r'./input_data/'
+INPUT_DIRECTORY_PATH = r'./input_data/'
 HOMEWORK_SUFFIX = "_HW_"
+OUTPUT_DIRECTORY_PATH = r'./output_data/'
+STUDENT_FILE_NAME = "students.toml"
 
 ''' Currently, this function will ask the user to enter a file name and will
     first check if the input is a valid path and also that it contains "_HW"
@@ -17,7 +19,7 @@ HOMEWORK_SUFFIX = "_HW_"
 
 def check_valid_file():
     # get input
-    current_dir = os.listdir(DIRECTORY_PATH)
+    current_dir = os.listdir(INPUT_DIRECTORY_PATH)
     input_file = input("Enter a file name: (EX: HW_3 , HW_5, ...)\n")
 
     # look for a file with given suffix (forgive me string manipulation ancestors, for I am comitting sins)
@@ -25,7 +27,7 @@ def check_valid_file():
         path_string for path_string in current_dir if input_file in path_string])).replace('[\'', '').replace('\']', '')
 
     # set path and see if it actually exists
-    path = Path(DIRECTORY_PATH + full_input_file)
+    path = Path(INPUT_DIRECTORY_PATH + full_input_file)
     if path.is_file() and HOMEWORK_SUFFIX in full_input_file:
         # if the file exists, we can pass it back to be opened
         print(f'The file {full_input_file} exists!!')
@@ -35,6 +37,19 @@ def check_valid_file():
         print(
             'That file either does not exist, or does not follow the naming convention :(\nPlease try again...\n')
         check_valid_file()
+
+
+def validate_name(id_name_list):
+    input_student_name = input("Enter student name to grade:\n")
+
+    valid_id_name = ([
+        name for name in id_name_list if input_student_name in name])
+
+    if (not valid_id_name):
+        print("Name not found, please try again")
+        return validate_name(id_name_list)
+    else:
+        return str(valid_id_name[0][1])
 
 
 def make_the_edit(row_to_edit, input_student_scores_df, input_data_list):
@@ -78,6 +93,7 @@ def ask_for_edits(student_scores_df, original_data_list_df):
 def make_new_line(input_question_grade):
     new_score = input(
         f"What was the score for question {input_question_grade[0]}? (Max value = {input_question_grade[1]})\n")
+
     new_comment = input("Comments?\n")
 
     # make new df for each line and append to final one
@@ -120,13 +136,20 @@ print("(Input the data in a 'questions_HW_x.toml' file, where x = the homework n
 final_file_choice = check_valid_file()
 
 # Handle homework file and extract a list of questions (toml -> dict -> list)
-with open("./input_data/test_data_HW_3.toml", mode="rb") as fp:
-    config = tomllib.load(fp)
-data_list = list(config['questions'].items())
+with open(f"{INPUT_DIRECTORY_PATH}{final_file_choice}", mode="rb") as fp:
+    HW_config = tomllib.load(fp)
+data_list = list(HW_config['questions'].items())
+
+
+# Handle student file and extract list of students
+with open(f"{INPUT_DIRECTORY_PATH}{STUDENT_FILE_NAME}", mode="rb") as fp:
+    STUDENT_config = tomllib.load(fp)
+id_name_list = list(STUDENT_config['id_name'].items())
 
 # ask for student name
-student_name = input("Enter student name to grade:\n")
-print(f"now grading {student_name}...\n\n\n")
+final_student_name = validate_name(id_name_list)
+
+print(f"now grading {final_student_name}...\n\n\n")
 
 
 # main I/O grading function, saves as a Dataframe -> (Question, Score, Max Score)
@@ -136,13 +159,13 @@ final_grade_df = input_grades(data_list)
 # Data Export
 print("\n\n\nHere is the final output:\n")
 print(final_grade_df)
+final_grade_df.to_csv(
+    f'{OUTPUT_DIRECTORY_PATH}{final_student_name}_{HW_config["title"]}_scores.csv', index=False)
 
 # -----------------------------------------------------------------------------------------
 
 # Things to do:
-# export as toml or csv? (WITH STUDENT NAME ATTACHED)
 # validate student name
-# validate number is within range
 # config file (homework suffix, include first row, ...)
 
 # ------------------------------------------------------------------------------------------
