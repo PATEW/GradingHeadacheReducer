@@ -1,1 +1,0 @@
-./input_data/tic_tac_toe.toml

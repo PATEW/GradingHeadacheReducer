@@ -166,6 +166,8 @@ final_grade_df.to_csv(
 
 # Things to do:
 # validate student name
+# fix bug with reading files bad then good
+# add in nice comment print after final df print so you can just copy+paste all comments
 # config file (homework suffix, include first row, ...)
 
 # ------------------------------------------------------------------------------------------
@@ -173,6 +175,7 @@ final_grade_df.to_csv(
 
 # with open("./input_data/tic_tac_toe.toml", mode="rb") as fp:
 #     config = tomllib.load(fp)
+
 
 # print(config["user"]["player_o"])
 
