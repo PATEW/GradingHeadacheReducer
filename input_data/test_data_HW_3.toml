@@ -1,0 +1,9 @@
+title = "HW_3"
+
+[questions]
+2_1_1 = 2
+2_1_2 = 4
+2_1_3 = 6
+2_1_4 = 3
+
+# key indicates question section, value is total number of questions in that section
